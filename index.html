@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#485f2c" />
+    <meta name="description" content="Find your table for our wedding celebration." />
+    <title>Find Your Place</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Allura&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Cormorant+SC:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Playfair+Display+SC:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="site-header">
+        <div class="monogram" aria-hidden="true">A <span>&amp;</span> J</div>
+        <div class="language-switcher" aria-label="Language">
+          <button class="language-button is-active" data-lang="en" type="button">EN</button>
+          <span aria-hidden="true">·</span>
+          <button class="language-button" data-lang="zh" type="button">中文</button>
+          <span aria-hidden="true">·</span>
+          <button class="language-button" data-lang="nl" type="button">NL</button>
+        </div>
+      </header>
+
+      <main>
+        <section class="hero" aria-labelledby="page-title">
+          <p class="eyebrow" data-i18n="eyebrow">Welcome to our wedding</p>
+          <h1 id="page-title" data-i18n="title">Find your place</h1>
+          <div class="flourish" aria-hidden="true"><span></span>❦<span></span></div>
+          <p class="intro" data-i18n="intro">Enter your name below and we’ll guide you to your table.</p>
+        </section>
+
+        <section class="finder" aria-label="Table finder">
+          <div id="envelope-stage" class="envelope-stage">
+            <div id="envelope" class="envelope">
+              <form id="search-form" class="envelope-face envelope-front" role="search" autocomplete="off">
+                <div class="postmark" aria-hidden="true"><span>14</span><span>SEP</span><span>2026</span></div>
+                <div class="stamp" aria-hidden="true"><span>❦</span></div>
+                <div class="address-block">
+                  <p id="match-count" class="match-count" aria-hidden="true">0 matches found</p>
+                  <label class="sr-only" for="guest-search" data-i18n="searchLabel">Your name</label>
+                  <div class="search-wrap">
+                    <input
+                      id="guest-search"
+                      type="search"
+                      inputmode="search"
+                      spellcheck="false"
+                      aria-autocomplete="list"
+                      aria-controls="suggestions"
+                      aria-expanded="false"
+                      data-i18n-placeholder="searchPlaceholder"
+                      placeholder="Start typing your name…"
+                    />
+                    <button id="clear-search" class="clear-button" type="button" aria-label="Clear search">×</button>
+                  </div>
+                  <ul id="suggestions" class="suggestions" role="listbox" hidden></ul>
+                  <p id="search-status" class="sr-only" aria-live="polite"></p>
+                  <button id="reveal-button" class="find-table-button" type="submit">
+                    <span data-i18n="reveal">Find my table</span>
+                  </button>
+                </div>
+              </form>
+
+              <div class="envelope-face envelope-back" aria-hidden="true">
+                <div class="card-window">
+                  <div class="letter-card">
+                    <div class="card-ornament" aria-hidden="true">❦</div>
+                    <p class="card-welcome" data-card-i18n="welcome">Welcome</p>
+                    <h2 id="card-guest-name" class="card-guest-name">Guest name</h2>
+                    <div class="card-divider" aria-hidden="true"><span></span>◇<span></span></div>
+                    <p class="card-table-label" data-card-i18n="tableIs">Your table is</p>
+                    <p id="card-table-number" class="card-table-number">—</p>
+                    <p class="card-note" data-card-i18n="resultNote">Please look for this number at the reception.</p>
+                  </div>
+                </div>
+                <div class="envelope-lining" aria-hidden="true"></div>
+                <div class="envelope-flap" aria-hidden="true"><span>❦</span></div>
+                <div class="envelope-pocket" aria-hidden="true"></div>
+                <div class="envelope-pocket-left" aria-hidden="true"></div>
+                <div class="envelope-pocket-right" aria-hidden="true"></div>
+              </div>
+            </div>
+          </div>
+
+          <button id="search-again" class="search-again" type="button" hidden>
+            <span aria-hidden="true">↺</span>
+            <span data-i18n="searchAgain">Search another name</span>
+          </button>
+          <button id="open-chart" class="chart-link" type="button">
+            <span data-i18n="cantFind">I cannot find my name</span>
+            <span aria-hidden="true">→</span>
+          </button>
+        </section>
+      </main>
+
+      <footer>
+        <p>14 · 09 · 2026</p>
+        <span aria-hidden="true">❦</span>
+        <p>Sintra, Portugal</p>
+      </footer>
+    </div>
+
+    <dialog id="seating-dialog" aria-labelledby="chart-title">
+      <div class="dialog-header">
+        <div>
+          <p class="eyebrow" data-i18n="chartEyebrow">Guest directory</p>
+          <h2 id="chart-title" data-i18n="chartTitle">Seating chart</h2>
+        </div>
+        <button id="close-chart" class="dialog-close" type="button" aria-label="Close">×</button>
+      </div>
+      <p class="dialog-intro" data-i18n="chartIntro">Names are listed alphabetically by last name.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th data-i18n="guestColumn">Guest</th>
+              <th data-i18n="tableColumn">Table</th>
+            </tr>
+          </thead>
+          <tbody id="seating-list"></tbody>
+        </table>
+      </div>
+    </dialog>
+  </body>
+</html>
