@@ -8,9 +8,10 @@ const translations = {
     reveal: "Find my table",
     searchAgain: "Search another name",
     cantFind: "I cannot find my name",
-    chartEyebrow: "Guest directory",
     chartTitle: "Seating chart",
-    chartIntro: "Names are listed alphabetically by last name.",
+    sortLabel: "Sort by",
+    sortFirst: "First name, A–Z",
+    sortLast: "Last name, A–Z",
     guestColumn: "Guest",
     tableColumn: "Table",
     tableLabel: "Table",
@@ -28,9 +29,10 @@ const translations = {
     reveal: "查找我的桌号",
     searchAgain: "查询另一个姓名",
     cantFind: "找不到我的名字",
-    chartEyebrow: "宾客名单",
     chartTitle: "座位表",
-    chartIntro: "宾客姓名按姓氏字母顺序排列。",
+    sortLabel: "排序方式",
+    sortFirst: "名字，A–Z",
+    sortLast: "姓氏，A–Z",
     guestColumn: "宾客",
     tableColumn: "桌号",
     tableLabel: "桌号",
@@ -48,9 +50,10 @@ const translations = {
     reveal: "Vind mijn tafel",
     searchAgain: "Zoek een andere naam",
     cantFind: "Ik kan mijn naam niet vinden",
-    chartEyebrow: "Gastenlijst",
     chartTitle: "Tafelindeling",
-    chartIntro: "De namen staan alfabetisch op achternaam.",
+    sortLabel: "Sorteren op",
+    sortFirst: "Voornaam, A–Z",
+    sortLast: "Achternaam, A–Z",
     guestColumn: "Gast",
     tableColumn: "Tafel",
     tableLabel: "Tafel",
@@ -71,6 +74,7 @@ const searchInput = document.querySelector("#guest-search");
 const suggestions = document.querySelector("#suggestions");
 const searchStatus = document.querySelector("#search-status");
 const matchCount = document.querySelector("#match-count");
+const guestSort = document.querySelector("#guest-sort");
 const clearButton = document.querySelector("#clear-search");
 const searchForm = document.querySelector("#search-form");
 const envelope = document.querySelector("#envelope");
@@ -275,10 +279,18 @@ function resetEnvelope() {
 }
 
 function renderSeatingChart() {
-  const sorted = [...guests].sort((a, b) => a.last_name.localeCompare(b.last_name) || a.first_name.localeCompare(b.first_name));
-  document.querySelector("#seating-list").innerHTML = sorted
-    .map(guest => `<tr><td>${escapeHTML(guest.first_name)} ${escapeHTML(guest.last_name)}</td><td>${escapeHTML(guest.table)}</td></tr>`)
-    .join("");
+  const primaryField = guestSort.value === "last" ? "last_name" : "first_name";
+  const secondaryField = primaryField === "first_name" ? "last_name" : "first_name";
+  const sorted = [...guests].sort((a, b) =>
+    a[primaryField].localeCompare(b[primaryField], currentLanguage, { sensitivity: "base" })
+    || a[secondaryField].localeCompare(b[secondaryField], currentLanguage, { sensitivity: "base" })
+  );
+  document.querySelector("#seating-list").innerHTML = sorted.map(guest => {
+    const displayName = primaryField === "last_name"
+      ? `${guest.last_name}, ${guest.first_name}`
+      : `${guest.first_name} ${guest.last_name}`;
+    return `<tr class="guest-row"><td>${escapeHTML(displayName)}</td><td>${escapeHTML(guest.table)}</td></tr>`;
+  }).join("");
 }
 
 function setLanguage(language) {
@@ -301,6 +313,7 @@ function setLanguage(language) {
   document.querySelectorAll(".language-button").forEach(button => button.classList.toggle("is-active", button.dataset.lang === language));
   matchCount.textContent = translations[language].matchCount(currentMatches.length);
   renderCard();
+  if (guests.length) renderSeatingChart();
   localStorage.setItem("wedding-language", language);
 }
 
@@ -366,6 +379,7 @@ secondaryActionButton.addEventListener("click", () => {
 });
 document.querySelector("#close-chart").addEventListener("click", () => dialog.close());
 dialog.addEventListener("click", event => { if (event.target === dialog) dialog.close(); });
+guestSort.addEventListener("change", renderSeatingChart);
 
 fetch("guests.csv")
   .then(response => {
