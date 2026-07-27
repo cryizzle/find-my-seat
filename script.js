@@ -1,68 +1,59 @@
 const translations = {
   en: {
-    eyebrow: "Welcome to our wedding",
-    title: "Find your place",
+    titleKicker: "Find",
+    titleScript: "Your Seat",
     intro: "Enter your name below and we’ll guide you to your table.",
     searchLabel: "Your name",
     searchPlaceholder: "Start typing your name…",
     reveal: "Find my table",
     searchAgain: "Search another name",
     cantFind: "I cannot find my name",
-    emptyHint: "Your table will appear here",
     chartEyebrow: "Guest directory",
     chartTitle: "Seating chart",
     chartIntro: "Names are listed alphabetically by last name.",
     guestColumn: "Guest",
     tableColumn: "Table",
-    welcome: "Welcome",
-    tableIs: "Your table is",
-    resultNote: "Please look for this number at the reception.",
+    tableLabel: "Table",
     chooseName: "Please choose your name from the suggestions.",
     matchCount: count => `${count} ${count === 1 ? "match" : "matches"} found`,
     suggestions: count => `${count} close ${count === 1 ? "match" : "matches"} found`,
     noMatches: "No close matches yet"
   },
   zh: {
-    eyebrow: "欢迎参加我们的婚礼",
-    title: "寻找您的座位",
+    titleKicker: "寻找",
+    titleScript: "您的座位",
     intro: "请在下方输入您的姓名，我们将为您显示桌号。",
     searchLabel: "您的姓名",
     searchPlaceholder: "请输入您的姓名…",
     reveal: "查找我的桌号",
     searchAgain: "查询另一个姓名",
     cantFind: "找不到我的名字",
-    emptyHint: "您的桌号将在这里显示",
     chartEyebrow: "宾客名单",
     chartTitle: "座位表",
     chartIntro: "宾客姓名按姓氏字母顺序排列。",
     guestColumn: "宾客",
     tableColumn: "桌号",
-    welcome: "欢迎",
-    tableIs: "您的桌号是",
-    resultNote: "请在宴会厅寻找此桌号。",
+    tableLabel: "桌号",
     chooseName: "请从建议列表中选择您的姓名。",
     matchCount: count => `找到 ${count} 个结果`,
     suggestions: count => `找到 ${count} 个相近结果`,
     noMatches: "暂未找到相近结果"
   },
   nl: {
-    eyebrow: "Welkom op onze bruiloft",
-    title: "Vind je plek",
+    titleKicker: "Vind",
+    titleScript: "Je Plek",
     intro: "Vul hieronder je naam in en wij wijzen je de weg naar je tafel.",
     searchLabel: "Je naam",
     searchPlaceholder: "Begin je naam te typen…",
     reveal: "Vind mijn tafel",
     searchAgain: "Zoek een andere naam",
     cantFind: "Ik kan mijn naam niet vinden",
-    emptyHint: "Je tafel verschijnt hier",
     chartEyebrow: "Gastenlijst",
     chartTitle: "Tafelindeling",
     chartIntro: "De namen staan alfabetisch op achternaam.",
     guestColumn: "Gast",
     tableColumn: "Tafel",
-    welcome: "Welkom",
-    tableIs: "Je tafel is",
-    resultNote: "Zoek dit nummer bij de receptie.",
+    tableLabel: "Tafel",
     chooseName: "Kies je naam uit de suggesties.",
     matchCount: count => `${count} ${count === 1 ? "resultaat" : "resultaten"} gevonden`,
     suggestions: count => `${count} ${count === 1 ? "vergelijkbaar resultaat" : "vergelijkbare resultaten"} gevonden`,
@@ -85,10 +76,15 @@ const searchForm = document.querySelector("#search-form");
 const envelope = document.querySelector("#envelope");
 const envelopeBack = document.querySelector(".envelope-back");
 const revealButton = document.querySelector("#reveal-button");
-const searchAgainButton = document.querySelector("#search-again");
+const secondaryActionButton = document.querySelector("#secondary-action");
+const secondaryActionText = document.querySelector("#secondary-action-text");
+const secondaryActionIcon = document.querySelector("#secondary-action-icon");
 const cardGuestName = document.querySelector("#card-guest-name");
+const cardTableImage = document.querySelector("#card-table-image");
 const cardTableNumber = document.querySelector("#card-table-number");
 const dialog = document.querySelector("#seating-dialog");
+const heroTitleArtwork = document.querySelector("#hero-title-artwork");
+const heroTitleLive = document.querySelector("#hero-title-live");
 
 function parseCSV(text) {
   const rows = [];
@@ -209,6 +205,7 @@ function escapeHTML(value) {
 
 function selectGuest(guest) {
   selectedGuest = guest;
+  revealButton.disabled = false;
   searchInput.value = `${guest.first_name} ${guest.last_name}`;
   clearButton.classList.add("is-visible");
   suggestions.hidden = true;
@@ -220,8 +217,18 @@ function selectGuest(guest) {
 
 function renderCard() {
   if (!selectedGuest) return;
+  const tableNumber = Number.parseInt(selectedGuest.table, 10);
+  const hasTableArtwork = Number.isInteger(tableNumber) && tableNumber >= 1 && tableNumber <= 7;
   cardGuestName.textContent = `${selectedGuest.first_name} ${selectedGuest.last_name}`;
   cardTableNumber.textContent = selectedGuest.table;
+  cardTableImage.hidden = !hasTableArtwork;
+  if (hasTableArtwork) {
+    cardTableImage.src = `assets/tables/table-${tableNumber}.png`;
+    cardTableImage.alt = `${translations[currentLanguage].tableLabel} ${selectedGuest.table}`;
+  } else {
+    cardTableImage.removeAttribute("src");
+    cardTableImage.alt = "";
+  }
   document.querySelectorAll("[data-card-i18n]").forEach(element => {
     element.textContent = translations[currentLanguage][element.dataset.cardI18n];
   });
@@ -237,17 +244,25 @@ function revealGuest() {
   searchForm.setAttribute("aria-hidden", "true");
   envelopeBack.setAttribute("aria-hidden", "false");
   envelope.classList.add("is-opening");
-  searchAgainButton.hidden = false;
+  setSecondaryActionMode("search");
   searchStatus.textContent = "";
+}
+
+function setSecondaryActionMode(mode) {
+  const translationKey = mode === "search" ? "searchAgain" : "cantFind";
+  secondaryActionButton.dataset.mode = mode;
+  secondaryActionText.dataset.i18n = translationKey;
+  secondaryActionText.textContent = translations[currentLanguage][translationKey];
+  secondaryActionIcon.textContent = mode === "search" ? "↺" : "→";
 }
 
 function resetEnvelope() {
   envelope.classList.remove("is-opening");
   envelopeBack.setAttribute("aria-hidden", "true");
-  searchAgainButton.hidden = true;
+  setSecondaryActionMode("chart");
   searchForm.setAttribute("aria-hidden", "false");
   searchInput.disabled = false;
-  revealButton.disabled = false;
+  revealButton.disabled = true;
   searchInput.value = "";
   selectedGuest = null;
   currentMatches = [];
@@ -275,6 +290,14 @@ function setLanguage(language) {
   document.querySelectorAll("[data-i18n-placeholder]").forEach(element => {
     element.placeholder = translations[language][element.dataset.i18nPlaceholder];
   });
+  const titleArtwork = {
+    en: "assets/hero/find-your-seat-en.svg",
+    zh: "assets/hero/find-your-seat-zh.svg",
+    nl: "assets/hero/find-your-seat-nl.svg"
+  }[language];
+  heroTitleArtwork.hidden = !titleArtwork;
+  if (titleArtwork) heroTitleArtwork.src = titleArtwork;
+  heroTitleLive.classList.toggle("sr-only", Boolean(titleArtwork));
   document.querySelectorAll(".language-button").forEach(button => button.classList.toggle("is-active", button.dataset.lang === language));
   matchCount.textContent = translations[language].matchCount(currentMatches.length);
   renderCard();
@@ -283,6 +306,7 @@ function setLanguage(language) {
 
 searchInput.addEventListener("input", () => {
   selectedGuest = null;
+  revealButton.disabled = true;
   matchCount.textContent = translations[currentLanguage].matchCount(0);
   clearButton.classList.toggle("is-visible", Boolean(searchInput.value));
   searchStatus.textContent = "";
@@ -311,6 +335,7 @@ searchInput.addEventListener("keydown", event => {
 clearButton.addEventListener("click", () => {
   searchInput.value = "";
   selectedGuest = null;
+  revealButton.disabled = true;
   currentMatches = [];
   matchCount.textContent = translations[currentLanguage].matchCount(0);
   matchCount.classList.remove("is-visible");
@@ -335,8 +360,10 @@ searchForm.addEventListener("submit", event => {
 });
 
 document.querySelectorAll(".language-button").forEach(button => button.addEventListener("click", () => setLanguage(button.dataset.lang)));
-searchAgainButton.addEventListener("click", resetEnvelope);
-document.querySelector("#open-chart").addEventListener("click", () => dialog.showModal());
+secondaryActionButton.addEventListener("click", () => {
+  if (secondaryActionButton.dataset.mode === "search") resetEnvelope();
+  else dialog.showModal();
+});
 document.querySelector("#close-chart").addEventListener("click", () => dialog.close());
 dialog.addEventListener("click", event => { if (event.target === dialog) dialog.close(); });
 
