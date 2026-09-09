@@ -381,7 +381,7 @@ document.querySelector("#close-chart").addEventListener("click", () => dialog.cl
 dialog.addEventListener("click", event => { if (event.target === dialog) dialog.close(); });
 guestSort.addEventListener("change", renderSeatingChart);
 
-fetch("guests.csv")
+fetch("guests.csv", { cache: "no-store" })
   .then(response => {
     if (!response.ok) throw new Error("Could not load guests.csv");
     return response.text();
